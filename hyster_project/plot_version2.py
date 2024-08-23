@@ -30,10 +30,10 @@ global_max_val += global_max_val * 0.1
 
 # Определяем количество строк и столбцов для подграфиков
 n_files = len(files)
-if not n_files/2 == n_files//2:
-    cols = n_files//2+1
+if not math.sqrt(n_files) == round(math.sqrt(n_files)):
+    cols = int((math.sqrt(n_files))) + 1
 else:
-    cols = files//2
+    cols = int(math.sqrt(n_files))
 rows = (n_files + cols - 1) // cols  # Количество строк зависит от количества файлов
 
 # Создаем глобальную фигуру и массив подграфиков
