@@ -13,7 +13,7 @@ files = [f for f in os.listdir(folder_path) if f.endswith('.dat')]
 # Функция для извлечения значения между "T=" и "C"
 def extract_T_value(file_name):
     match = re.search(r'T=(.*?)C', file_name)
-    return float(match.group(1)) if match else file_name
+    return float(match.group(1)) if match else float('inf')
 
 # Сортируем файлы по значению T
 files.sort(key=extract_T_value)
