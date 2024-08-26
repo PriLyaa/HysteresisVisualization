@@ -10,23 +10,28 @@ folder_path = r'C:\Users\User\Documents\VSCode\HysteresisVisualization\data'
 # Список всех .dat файлов в папке
 files = [f for f in os.listdir(folder_path) if f.endswith('.dat')]
 
-# Функция для извлечения значения между "T=" и "C"
+# Извлечение значения между "T=" и "C"
 def extract_T_value(file_name):
-    match = re.search(r'T=(.*?)C', file_name)
-    return float(match.group(1)) if match else float('inf')
+    match_by_C = re.search(r'T=(.*?)C', file_name)
+    match_by_deg = re.search(r'T=(.*?)deg', file_name)
+    return float(match_by_C.group(1)) if match_by_C else float(match_by_deg.group(1)) if match_by_deg else float('inf')
 
 # Сортировка файлов по значению T
 files.sort(key=extract_T_value)
 
 # Нормировка всех графиков по максимальному значению сигнала + 10%
-global_max_val = -float('inf')
+global_max_val_y = -float('inf')
 for file_name in files:
     file_path = os.path.join(folder_path, file_name)
     data = np.loadtxt(file_path)
+    min_val = np.min(data[:, 1])
     max_val = np.max(data[:, 1])
-    if max_val > global_max_val:
-        global_max_val = max_val
-global_max_val += global_max_val * 0.1
+    shift = (max_val + min_val) / 2
+    data[:, 1] -= shift
+    max_val_y = np.max(data[:, 1])
+    if max_val_y > global_max_val_y:
+        global_max_val_y = max_val_y
+global_max_val_y += global_max_val_y * 0.1
 
 # Определение количества строк и столбцов для подграфиков
 n_files = len(files)
@@ -42,7 +47,7 @@ fig, axs = plt.subplots(rows, cols, layout='constrained')
 
 for i, file_name in enumerate(files):
     file_path = os.path.join(folder_path, file_name)
-
+    
     try:
         # Чтение данных из файла
         data = np.loadtxt(file_path)
@@ -61,9 +66,9 @@ for i, file_name in enumerate(files):
         # Смещение всех значений второй колонки для центрирования относительно 0
         data[:, 1] -= shift
         print(np.min(data[:, 1]), np.max(data[:, 1]))
-
+    
         # Извлечение части названия файла между "T=" и "C"
-        plot_label = extract_T_value(file_name)
+        plot_label = int(extract_T_value(file_name))
 
         # Определение позиции текущего подграфика
         ax = axs[i // cols, i % cols] if rows > 1 else axs[i % cols]
@@ -78,7 +83,7 @@ for i, file_name in enumerate(files):
         ax.legend()
 
         # Устанавливаем одинаковый масштаб по оси Y
-        ax.set_ylim(-global_max_val, global_max_val)
+        ax.set_ylim(-global_max_val_y, global_max_val_y)
 
     except Exception as e:
         print(f"Произошла ошибка при обработке файла {file_name}: {e}")
