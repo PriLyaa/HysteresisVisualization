@@ -15,10 +15,10 @@ def extract_T_value(file_name):
     match = re.search(r'T=(.*?)C', file_name)
     return float(match.group(1)) if match else float('inf')
 
-# Сортируем файлы по значению T
+# Сортировка файлов по значению T
 files.sort(key=extract_T_value)
 
-# Ищем глобальный максимум во второй колонке среди всех файлов
+# Нормировка всех графиков по максимальному значению сигнала + 10%
 global_max_val = -float('inf')
 for file_name in files:
     file_path = os.path.join(folder_path, file_name)
@@ -28,7 +28,7 @@ for file_name in files:
         global_max_val = max_val
 global_max_val += global_max_val * 0.1
 
-# Определяем количество строк и столбцов для подграфиков
+# Определение количества строк и столбцов для подграфиков
 n_files = len(files)
 if not math.sqrt(n_files) == round(math.sqrt(n_files)):
     cols = int((math.sqrt(n_files))) + 1
@@ -36,13 +36,12 @@ else:
     cols = int(math.sqrt(n_files))
 rows = (n_files + cols - 1) // cols  # Количество строк зависит от количества файлов
 
-# Создаем глобальную фигуру и массив подграфиков
+# Создание глобальной фигуры и массива подграфиков
 plt.style.use('seaborn-v0_8-whitegrid')
 fig, axs = plt.subplots(rows, cols, layout='constrained')
 
 for i, file_name in enumerate(files):
     file_path = os.path.join(folder_path, file_name)
-
 
     try:
         # Чтение данных из файла
@@ -56,7 +55,7 @@ for i, file_name in enumerate(files):
         max_val = np.max(data[:, 1])
         print(min_val, max_val)
             
-        # Определяем смещение, чтобы центрировать график
+        # Определение смещения, чтобы центрировать график
         shift = (max_val + min_val) / 2
             
         # Смещение всех значений второй колонки для центрирования относительно 0
@@ -66,7 +65,7 @@ for i, file_name in enumerate(files):
         # Извлечение части названия файла между "T=" и "C"
         plot_label = extract_T_value(file_name)
 
-        # Определяем позицию текущего подграфика
+        # Определение позиции текущего подграфика
         ax = axs[i // cols, i % cols] if rows > 1 else axs[i % cols]
         
         # Строим график на подграфике
@@ -84,10 +83,10 @@ for i, file_name in enumerate(files):
     except Exception as e:
         print(f"Произошла ошибка при обработке файла {file_name}: {e}")
 
-# Отключаем пустые подграфики, если они есть
+# Отключение пустых подграфиков, если они есть
 for j in range(i + 1, rows * cols):
     fig.delaxes(axs[j // cols, j % cols] if rows > 1 else axs[j % cols])
 
-# Настраиваем общие параметры фигуры
+# Настройка общих параметров фигуры
 #plt.tight_layout()
 plt.show()
