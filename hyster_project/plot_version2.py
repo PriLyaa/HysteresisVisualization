@@ -67,8 +67,9 @@ for i, file_name in enumerate(files):
         data[:, 1] -= shift
         print(np.min(data[:, 1]), np.max(data[:, 1]))
     
-        # Извлечение части названия файла между "T=" и "C"
-        plot_label = int(extract_T_value(file_name))
+        # Подпись к графиками (температура)
+        plot_label = f'{int(extract_T_value(file_name))+273}K'  # в Кельвинах
+        #plot_label = int(extract_T_value(file_name))            # в Цельсиях
 
         # Определение позиции текущего подграфика
         ax = axs[i // cols, i % cols] if rows > 1 else axs[i % cols]
